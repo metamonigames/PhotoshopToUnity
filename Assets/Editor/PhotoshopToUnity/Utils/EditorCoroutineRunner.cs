@@ -231,11 +231,11 @@ namespace SubjectNerd.PsdImporter
                         // These dont make sense in editor, so we will treat them the same as a null return...
                         isWaiting = false;
                     }
-                    else if (currentType == typeof(WWW))
+                    else if (currentType == typeof(UnityEngine.Networking.UnityWebRequest))
                     {
                         // Web download request, lets see if its done!
-                        var www = current as WWW;
-                        if (!www.isDone)
+                        var webRequest = current as UnityEngine.Networking.UnityWebRequest;
+                        if (!webRequest.isDone)
                         {
                             isWaiting = true;
                         }

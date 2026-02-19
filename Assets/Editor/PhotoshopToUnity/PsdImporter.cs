@@ -461,8 +461,7 @@ namespace SubjectNerd.PsdImporter
 			texSetting.mipmapEnabled = false;
 			texSetting.alphaIsTransparency = true;
 			texSetting.npotScale = TextureImporterNPOTScale.None;
-			// Set the rest of the texture settings
-			if (textureImporter != null) textureImporter.spritePackingTag = importSettings.PackingTag;
+			// spritePackingTag 제거됨 - SpriteAtlas 사용 권장
 			// Write in the texture import settings
 			if (textureImporter != null) textureImporter.SetTextureSettings(texSetting);
 
