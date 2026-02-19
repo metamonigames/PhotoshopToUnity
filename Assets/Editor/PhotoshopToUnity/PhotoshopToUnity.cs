@@ -18,43 +18,18 @@ using Object = UnityEngine.Object;
 public class PhotoshopToUnity : EditorWindow
 {
     /// <summary>
-    /// btn_ -> 버튼
-    /// icon_ -> 아이콘(이미지)
-    /// deco_ -> 데코 이미지(특정한 이미지 패턴을 반복 할 때 복사해서 사용)
-    /// img_ -> UI 이미지(게이지, 자주 사용하는 이미지)
-    /// bg_ -> BG,타이틀 이미지
-    /// inner_ -> 팝업 이너
-    /// item_ -> 아이템 이미지
-    /// txt_, stxt_ -> TextMeshPro 텍스트 (통합)
+    /// 레이어 타입 (단순화)
+    /// - Txt: txt_, stxt_ 텍스트 레이어 -> RBTextMeshProUGUI
+    /// - Image: 나머지 모든 이미지 레이어
     /// </summary>
     public enum LayerType
     {
-        None,
-        Button,
-        IconImage,
-        DecoImage,
-        UIImage,
-        BGImage,
-        ItemImage,
-        InnerImage,
         Txt,
+        Image,
     }
 
-    /// <summary>
-    /// 접두사 리스트
-    /// </summary>
-    public static List<string> PrefixList = new List<string>()
-    {
-        "IMG_",
-        "BTN_",
-        "ICON_",
-        "DECO_",
-        "UI_",
-        "BG_",
-        "ITEM_",
-        "INNER_",
-        "TXT_",
-    };
+    private const string TEXT_PREFIX = "TXT_";
+    private const string STXT_PREFIX = "STXT_";
 
     private const string MENU_ASSET_IMPORT = "Assets/Tools/Create (PhotoshopToUnity)";
     //private const string MENU_ASSET_COMMON_IMPORT = "Assets/Tools/Create (PhotoshopToUnity-Common)";
@@ -73,38 +48,8 @@ public class PhotoshopToUnity : EditorWindow
     /// </summary>
     private static string _commonImagePath = null;
 
-    /// <summary>
-    /// 이름에 replace 해줘야 할 녀석들
-    /// txt_tjsxor_ehddlf_qmffhr_6ro_^NotoSansCJKjp-Bold^18^닉네임닉네임^#FFFFFF^null^null^null^null^null^null
-    /// </summary>
-    public static List<string> ReplaceCharList = new List<string>
-        {
-            ":",
-            ";",
-            ",",
-            //".",
-            "`",
-            "+",
-            //"-", // NotoSansCJKjp-Bold 로 사용 중
-            "*",
-            "<",
-            ">",
-            "[",
-            "]",
-            "(",
-            ")",
-            "$",
-            "@",
-            "!",
-            "&",
-            "%",
-            "=",
-            "|",
-            "?",
-            //"\\",
-            "/",
-            //"#", //#FFFFFF 로 사용 중
-        };
+    // 레이어명에서 제거할 특수문자 (정규식)
+    private const string INVALID_LAYER_NAME_CHARS = @"[:\;,`+*<>\[\]\(\)$@!&%=|?/]";
 
 #if UNITY_EDITOR
     /// <summary>
@@ -354,12 +299,8 @@ public class PhotoshopToUnity : EditorWindow
 
         string layerName = datas.Dequeue();
 
-        // 이름에 : 가 들어가 있는 경우 멋대로 _ 로 바꿔버리기 때문에 강제로 변경 기능 추가
-        for (int i = 0; i < ReplaceCharList.Count; i++)
-        {
-            layerName = System.Text.RegularExpressions.Regex.Replace(layerName, "([" + PhotoshopToUnity.ReplaceCharList[i] + "])", "");
-        }
-
+        // 특수문자 제거
+        layerName = System.Text.RegularExpressions.Regex.Replace(layerName, INVALID_LAYER_NAME_CHARS, "");
         layerName = PsdImporter.SanitizeString(layerName, Path.GetInvalidFileNameChars());
 
         // 길이가 너무 길어서 수정
@@ -367,26 +308,6 @@ public class PhotoshopToUnity : EditorWindow
         {
             layerName = layerName.Substring(0, PsdImporter.MAX_LAYER_NAME_LEN - 1);
         }
-
-        //List<string> prefixList = new List<string>
-        //{
-        //    "img_",
-        //    "txt_",
-        //    "stxt_",
-        //    "btn_",
-        //    "_bt_",
-        //};
-
-        //for (int i = 0; i < prefixList.Count; i++)
-        //{
-        //    string layerPrefixName = prefixList[i];
-        //    string gameobjectPrefixName = prefixList[i].ToUpper();
-
-        //    if (layerName.IndexOf(layerPrefixName) != -1)
-        //    {
-        //        layerName = layerName.Replace(layerPrefixName, gameobjectPrefixName);
-        //    }
-        //}
 
         // 포토샵 폴더를 처리
         Transform parentTransform = container.transform;
@@ -398,16 +319,11 @@ public class PhotoshopToUnity : EditorWindow
                 folders = targetImportLayerData.path.Split('/');
                 for (int i = 0; i < folders.Length - 1; i++)
                 {
-                    string prefix = folders[i].ToLower();
-
-                    LayerType prefixLayerType = GetLayerType(prefix, datas.Count);
-                    if (prefixLayerType != LayerType.None)
-                    {
+                    // 폴더명으로 레이어 타입 판별 (텍스트 폴더는 생성하지 않음)
+                    if (GetLayerType(folders[i], datas.Count) == LayerType.Txt)
                         break;
-                    }
-                    else
-                    {
-                        if (parentTransform.Find(folders[i]) == null)
+
+                    if (parentTransform.Find(folders[i]) == null)
                         {
                             GameObject obj = new GameObject(folders[i]);
                             obj.transform.SetParent(parentTransform);
@@ -440,22 +356,12 @@ public class PhotoshopToUnity : EditorWindow
         float x = (targetImportLayerData.originalX - halfWidth) + (targetSprite.rect.size.x * 0.5f);
         float y = (halfHeight - targetImportLayerData.originalY) - (targetSprite.rect.size.y * 0.5f);
 
-        RectTransform rectTransform;
-        if (child.GetComponent<RectTransform>() == null)
-        {
-            rectTransform = child.AddComponent<RectTransform>();
-        }
-        else
-        {
-            rectTransform = child.GetComponent<RectTransform>();
-        }
+        var rectTransform = child.GetComponent<RectTransform>() ?? child.AddComponent<RectTransform>();
 
         rectTransform.localPosition = new Vector3(x, y);
         rectTransform.sizeDelta = targetSprite.rect.size;
         rectTransform.localScale = Vector3.one;
 
-        UnityEngine.UI.Image targetImage;
-        UnityEngine.UI.Button targetButton;
         RBTextMeshProUGUI targetTextMeshProUGUI;
 
         LayerType layerType = GetLayerType(layerName, datas.Count);
@@ -581,57 +487,14 @@ public class PhotoshopToUnity : EditorWindow
                 }
                 break;
 
-            case LayerType.Button:
-                targetImage = child.AddComponent<UnityEngine.UI.Image>();
+            default: // LayerType.Image
+                var targetImage = child.AddComponent<UnityEngine.UI.Image>();
                 targetImage.sprite = targetSprite;
+                targetImage.type = UnityEngine.UI.Image.Type.Simple;
 
                 rectTransform.sizeDelta = new Vector2(psdLayer.Width, psdLayer.Height);
 
-                // 나인슬라이스인지 체크
-                if (targetSprite.border != Vector4.zero)
-                {
-                    targetImage.type = UnityEngine.UI.Image.Type.Sliced;
-
-                    x = (targetImportLayerData.originalX - halfWidth) + (rectTransform.rect.size.x * 0.5f);
-                    y = (halfHeight - targetImportLayerData.originalY) - (rectTransform.rect.size.y * 0.5f);
-
-                    rectTransform.localPosition = new Vector3(x, y);
-                }
-                else
-                {
-                    targetImage.type = UnityEngine.UI.Image.Type.Simple;
-                }
-
-                targetButton = child.AddComponent<UnityEngine.UI.Button>();
-                targetButton.transition = UnityEngine.UI.Selectable.Transition.None;
-
-                UnityEngine.Animator targetAnimator = child.AddComponent<Animator>();
-                UnityEditor.Animations.AnimatorController targetController = Resources.Load<UnityEditor.Animations.AnimatorController>("Animations/ButtonAniController");
-                targetAnimator.runtimeAnimatorController = targetController;
-                //child.AddComponent<ButtonEventPlayer>();
-                break;
-
-            default:
-                targetImage = child.AddComponent<UnityEngine.UI.Image>();
-                targetImage.sprite = targetSprite;
-
-                rectTransform.sizeDelta = new Vector2(psdLayer.Width, psdLayer.Height);
-
-                // 나인슬라이스인지 체크
-                //if (targetSprite.border != Vector4.zero)
-                //{
-                //    targetImage.type = UnityEngine.UI.Image.Type.Sliced;
-
-                //    x = (targetImportLayerData.originalX - halfWidth) + (rectTransform.rect.size.x * 0.5f);
-                //    y = (halfHeight - targetImportLayerData.originalY) - (rectTransform.rect.size.y * 0.5f);
-
-                //    rectTransform.localPosition = new Vector3(x, y);
-                //}
-                //else
-                {
-                    targetImage.type = UnityEngine.UI.Image.Type.Simple;
-                }
-
+                // 투명도 적용
                 if (psdLayer.Opacity != 1.0f)
                 {
                     Color tempColor = targetImage.color;
@@ -710,56 +573,22 @@ public class PhotoshopToUnity : EditorWindow
     }
 
     /// <summary>
-    /// btn_ -> 버튼
-    /// icon_ -> 아이콘(이미지)
-    /// deco_ -> 데코 이미지(특정한 이미지 패턴을 반복 할 때 복사해서 사용)
-    /// img_ -> UI 이미지(게이지, 자주 사용하는 이미지)
-    /// bg_ -> BG,타이틀 이미지
-    /// inner_ -> 팝업 이너
-    /// item_ -> 아이템 이미지
-    /// txt_, stxt_ -> TextMeshPro 텍스트 (통합)
+    /// 레이어 타입 판별
+    /// - txt_, stxt_: 텍스트 레이어 (충분한 데이터 필요)
+    /// - 나머지: 이미지 레이어
     /// </summary>
-    /// <param name="layerName"></param>
-    /// <param name="inQueueCount">1 인 경우 txt 가 아님 적어도 4 이상</param>
-    /// <returns></returns>
     public static LayerType GetLayerType(string layerName, int inQueueCount = 1)
     {
         string name = layerName.ToUpper();
 
-        if ((name.Contains(PrefixList[(int)LayerType.Txt]) || name.Contains("STXT_")) && inQueueCount > 4)
+        // 텍스트 레이어 판별 (txt_, stxt_로 시작하고 충분한 데이터 있음)
+        if ((name.Contains(TEXT_PREFIX) || name.Contains(STXT_PREFIX)) && inQueueCount > 4)
         {
             return LayerType.Txt;
         }
-        else if (name.Contains(PrefixList[(int)LayerType.Button]))
-        {
-            return LayerType.Button;
-        }
-        else if (name.Contains(PrefixList[(int)LayerType.IconImage]))
-        {
-            return LayerType.IconImage;
-        }
-        else if (name.Contains(PrefixList[(int)LayerType.DecoImage]))
-        {
-            return LayerType.DecoImage;
-        }
-        else if (name.Contains(PrefixList[(int)LayerType.UIImage]))
-        {
-            return LayerType.UIImage;
-        }
-        else if (name.Contains(PrefixList[(int)LayerType.BGImage]))
-        {
-            return LayerType.BGImage;
-        }
-        else if (name.Contains(PrefixList[(int)LayerType.InnerImage]))
-        {
-            return LayerType.InnerImage;
-        }
-        else if (name.Contains(PrefixList[(int)LayerType.ItemImage]))
-        {
-            return LayerType.ItemImage;
-        }
 
-        return LayerType.None;
+        // 나머지는 모두 이미지
+        return LayerType.Image;
     }
 
     const string configAssetName = "PhotoshopToUnity";
