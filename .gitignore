@@ -1,0 +1,111 @@
+# [공통] Unity 엔진 관련 자동 생성 파일 및 임시 폴더
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/Build/
+/Build*/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+.utmp/
+*BurstDebugInformation_DoNotShip/
+v[0-9]*/
+nul
+
+# [메모리/녹화] 용량이 크거나 민감한 데이터 포함 가능성 [cite: 2, 10]
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+
+# [IDE] Visual Studio / VS Code / JetBrains 관련
+.vs/
+.vscode/
+/[Aa]ssets/VSCode/
+.idea/
+.gradle/
+ExportedObj/
+.consulo/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+
+# [에셋 플러그인] JetBrains Rider 및 기타
+/[Aa]ssets/Plugins/Editor/JetBrains*
+# /[Aa]ssets/AssetStoreTools*
+
+# [빌드 결과물]
+*.apk
+*.aab
+*.unitypackage
+*.unitypackage.meta
+*.app
+sysinfo.txt
+crashlytics-build.properties
+
+# [Addressables/Android]
+/[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/*/*.bin*
+/[Aa]ssets/[Ss]treamingAssets/aa.meta
+/[Aa]ssets/[Ss]treamingAssets/aa/*
+/[Aa]ssets/[Ss]treamingAssets/build_info.txt
+
+# [FMOD 관련] [cite: 5, 6, 7, 8, 11, 12, 13, 14]
+!/[Aa]ssets/Plugins/FMOD/**/lib/*
+!/[Aa]ssets/Gizmos/FMOD/*
+!/[Aa]ssets/Editor Default Resources/FMOD/*
+/[Aa]ssets/Plugins/FMOD/Cache/*
+/[Aa]ssets/StreamingAssets/**/*.bank
+/[Aa]ssets/StreamingAssets/**/*.bank.meta
+fmod_editor.log
+
+# [Bakery 관련 설정]
+/[Aa]ssets/Bakery/*
+!/[Aa]ssets/Bakery/shader/
+!/[Aa]ssets/Bakery/shader/*
+!/[Aa]ssets/Bakery/shader/**
+!/[Aa]ssets/Bakery/ftLightmaps.cs
+!/[Aa]ssets/Bakery/ftLightmapsStorage.cs
+!/[Aa]ssets/Bakery/ftLocalStorage.cs
+!/[Aa]ssets/Bakery/ftGlobalStorage.cs
+!/[Aa]ssets/Bakery/BakeryProjectSettings.cs
+!/[Aa]ssets/Bakery/ftLightmaps.cs.meta
+!/[Aa]ssets/Bakery/ftLightmapsStorage.cs.meta
+!/[Aa]ssets/Bakery/ftLocalStorage.cs.meta
+!/[Aa]ssets/Bakery/ftGlobalStorage.cs.meta
+!/[Aa]ssets/Bakery/BakeryProjectSettings.cs.meta
+/[Aa]ssets/Editor/x64/Bakery/*
+!/[Aa]ssets/Editor/x64/Bakery/*/
+/[Aa]ssets/Editor/x64/Bakery/hwtestdata/*
+/[Aa]ssets/Editor/x64/Bakery/lightingDataChunks/*
+/[Aa]ssets/Editor/x64/Bakery/shaderSrc/*
+/[Aa]ssets/Editor/x64/Bakery/scripts/*
+!/**/ftModelPostProcessor.cs
+!/**/ftSavedPadding2.cs
+!/**/ftModelPostProcessor.cs.meta
+!/**/ftSavedPadding2.cs.meta
+
+# [기타 프로젝트 전용 설정]
+Assets/Resources/PerformanceTestRunInfo.json
+Assets/Resources/PerformanceTestRunInfo.json.meta
+Assets/Resources/PerformanceTestRunSettings.json
+Assets/Resources/PerformanceTestRunSettings.json.meta
+Assets/StreamingAssets/package_statics_converted.json
+Assets/StreamingAssets/package_statics_converted.json.meta
+cmake-build-*/
+atlassian-ide-plugin.xml
+com_crashlytics_export_strings.xml
+crashlytics.properties
+fabric.properties
