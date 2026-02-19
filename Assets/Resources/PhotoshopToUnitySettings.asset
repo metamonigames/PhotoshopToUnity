@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: PhotoshopToUnitySettings
   m_EditorClassIdentifier: 
   _referanceResolution: {x: 720, y: 1280}
-  _preset: {fileID: 1083956870076696, guid: a028ec0ff83a0e64fab67c586b484691, type: 3}
-  _savePath: Assets/AssetBundles/Temp/{0}
+  _preset: {fileID: 6853803380693756111, guid: 3c30933294ce6e14d8430554e6fbf10b, type: 3}
+  _savePath: Assets/SamplePsd/{0}
   _parentGameObjectName: Background
   _isFolder: 1
   _commonPath: Assets/Resources/Common/PackSources
