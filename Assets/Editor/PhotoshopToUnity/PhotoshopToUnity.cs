@@ -3,6 +3,7 @@ psd 파일을 프리팹으로 만들어주기 위해 만듦
 자세한 사항은 전경문에게 물어보세용.
 */
 
+using Cysharp.Threading.Tasks;
 using SubjectNerd.PsdImporter;
 using System;
 using System.Collections.Generic;
@@ -452,8 +453,6 @@ public class PhotoshopToUnity : EditorWindow
         rectTransform.localPosition = new Vector3(x, y);
         rectTransform.sizeDelta = targetSprite.rect.size;
         rectTransform.localScale = Vector3.one;
-
-        Thread.Sleep(10);
 
         UnityEngine.UI.Image targetImage;
         UnityEngine.UI.Button targetButton;

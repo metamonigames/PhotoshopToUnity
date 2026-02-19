@@ -63,18 +63,29 @@ PSD 파일을 Unity 프리펩으로 변환하는 시스템입니다.
 ### 4. Unity 에디터 스크립트 개선
 **파일**: `Assets/Editor/PhotoshopToUnity/PhotoshopToUnity.cs`
 
-#### 4-1. 로깅 개선
+#### 4-1. UniTask를 활용한 비동기 처리 개선 (NEW!)
+- Line 457: `Thread.Sleep(10)` → `await UniTask.Yield()` 또는 `await UniTask.Delay(10)`
+- UI 스레드 블로킹 제거로 에디터 응답성 개선
+- EditorCoroutineRunner 최소화
+- 구현 예시:
+  ```csharp
+  // 기존: Thread.Sleep(10) - UI 블로킹
+  // 개선: await UniTask.Yield() - UI 응답 유지
+  await UniTask.Yield();
+  ```
+
+#### 4-2. 로깅 개선
 - Line 310: 현재 처리 중인 레이어명 로그 추가
 - 스프라이트 로딩 실패 경고
 - 폰트 로딩 실패 경고
 
-#### 4-2. 설정 검증 강화
+#### 4-3. 설정 검증 강화
 - Line 116-125: `PhotoshopToUnitySettings` 검증 개선
 - 필수 폰트 존재 여부 확인
 - `_settings.Preset` 유효성 검증
 
-#### 4-3. 예외 처리 개선
-- Thread.Sleep(10) 대신 더 나은 동기화 메커니즘 (Line 457)
+#### 4-4. 예외 처리 개선
+- UniTask 기반 비동기 처리로 예외 안정성 향상
 - 파일 삭제 실패 시 예외 처리
 - 프리펩 저장 실패 처리
 
