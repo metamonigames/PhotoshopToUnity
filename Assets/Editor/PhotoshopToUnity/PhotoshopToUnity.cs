@@ -326,19 +326,14 @@ public class PhotoshopToUnity : EditorWindow
                     if (parentTransform.Find(folders[i]) == null)
                     {
                         GameObject obj = new GameObject(folders[i]);
-                        obj.transform.SetParent(parentTransform);
+                        obj.AddComponent<RectTransform>();
+                        obj.transform.SetParent(parentTransform, false);
 
-                        RectTransform rtObj;
-                        if (obj.GetComponent<RectTransform>() == null)
-                        {
-                            rtObj = obj.AddComponent<RectTransform>();
-                        }
-                        else
-                        {
-                            rtObj = obj.GetComponent<RectTransform>();
-                        }
-
-                        rtObj.localPosition = new Vector3(0, 0);
+                        var rtObj = obj.GetComponent<RectTransform>();
+                        rtObj.anchorMin = Vector2.zero;
+                        rtObj.anchorMax = Vector2.zero;
+                        rtObj.pivot = new Vector2(0.5f, 0.5f);
+                        rtObj.anchoredPosition = Vector2.zero;
                         rtObj.sizeDelta = new Vector2(_settings.ReferanceResolution.x, _settings.ReferanceResolution.y);
                         rtObj.localScale = Vector3.one;
                     }
@@ -349,15 +344,19 @@ public class PhotoshopToUnity : EditorWindow
         }
 
         // 레이어를 게임오브젝트로 생성
+        // SetParent 전에 RectTransform을 먼저 추가해야 Canvas 계층 여부와 무관하게 안전하게 처리됨
         GameObject child = new GameObject(layerName);
-        child.transform.SetParent(parentTransform);
+        child.AddComponent<RectTransform>();
+        child.transform.SetParent(parentTransform, false);
 
         float x = (targetImportLayerData.originalX - halfWidth) + (targetSprite.rect.size.x * 0.5f);
         float y = (halfHeight - targetImportLayerData.originalY) - (targetSprite.rect.size.y * 0.5f);
 
-        var rectTransform = child.GetComponent<RectTransform>() ?? child.AddComponent<RectTransform>();
-
-        rectTransform.localPosition = new Vector3(x, y);
+        var rectTransform = child.GetComponent<RectTransform>();
+        rectTransform.anchorMin = Vector2.zero;
+        rectTransform.anchorMax = Vector2.zero;
+        rectTransform.pivot = new Vector2(0.5f, 0.5f);
+        rectTransform.anchoredPosition = new Vector2(x, y);
         rectTransform.sizeDelta = targetSprite.rect.size;
         rectTransform.localScale = Vector3.one;
 
