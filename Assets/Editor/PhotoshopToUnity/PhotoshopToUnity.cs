@@ -247,8 +247,9 @@ public class PhotoshopToUnity : EditorWindow
 
             default: // LayerType.Image
                 var img = child.AddComponent<UnityEngine.UI.Image>();
-                img.sprite = targetSprite;
-                img.type   = UnityEngine.UI.Image.Type.Simple;
+                img.sprite        = targetSprite;
+                img.type          = UnityEngine.UI.Image.Type.Simple;
+                img.raycastTarget = false;
                 rectTransform.sizeDelta = new Vector2(psdLayer.Width, psdLayer.Height);
 
                 if (psdLayer.Opacity != 1.0f)
@@ -267,6 +268,7 @@ public class PhotoshopToUnity : EditorWindow
         Queue<string> datas, string[] folders, string layerName)
     {
         var tmp = child.AddComponent<RBTextMeshProUGUI>();
+        tmp.raycastTarget = false;
         if (datas.Count <= 4) return;
 
         string fontName  = datas.Dequeue();
