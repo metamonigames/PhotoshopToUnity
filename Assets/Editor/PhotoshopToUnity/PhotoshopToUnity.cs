@@ -49,7 +49,7 @@ public class PhotoshopToUnity : EditorWindow
     private static string _commonImagePath = null;
 
     // 레이어명에서 제거할 특수문자 (정규식)
-    private const string INVALID_LAYER_NAME_CHARS = @"[:\;,`+*<>\[\]\(\)$@!&%=|?/]";
+    internal const string INVALID_LAYER_NAME_CHARS = @"[:\;,`+*<>\[\]\(\)$@!&%=|?/]";
 
 #if UNITY_EDITOR
     /// <summary>
@@ -324,27 +324,26 @@ public class PhotoshopToUnity : EditorWindow
                         break;
 
                     if (parentTransform.Find(folders[i]) == null)
+                    {
+                        GameObject obj = new GameObject(folders[i]);
+                        obj.transform.SetParent(parentTransform);
+
+                        RectTransform rtObj;
+                        if (obj.GetComponent<RectTransform>() == null)
                         {
-                            GameObject obj = new GameObject(folders[i]);
-                            obj.transform.SetParent(parentTransform);
-
-                            RectTransform rtObj;
-                            if (obj.GetComponent<RectTransform>() == null)
-                            {
-                                rtObj = obj.AddComponent<RectTransform>();
-                            }
-                            else
-                            {
-                                rtObj = obj.GetComponent<RectTransform>();
-                            }
-
-                            rtObj.localPosition = new Vector3(0, 0);
-                            rtObj.sizeDelta = new Vector2(_settings.ReferanceResolution.x, _settings.ReferanceResolution.y);
-                            rtObj.localScale = Vector3.one;
+                            rtObj = obj.AddComponent<RectTransform>();
+                        }
+                        else
+                        {
+                            rtObj = obj.GetComponent<RectTransform>();
                         }
 
-                        parentTransform = parentTransform.Find(folders[i]);
+                        rtObj.localPosition = new Vector3(0, 0);
+                        rtObj.sizeDelta = new Vector2(_settings.ReferanceResolution.x, _settings.ReferanceResolution.y);
+                        rtObj.localScale = Vector3.one;
                     }
+
+                    parentTransform = parentTransform.Find(folders[i]);
                 }
             }
         }

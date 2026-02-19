@@ -515,11 +515,8 @@ namespace SubjectNerd.PsdImporter
                 filename = string.Format("{0}.png", layerName);
             }
 
-            // 이름에 : 가 들어가 있는 경우 멋대로 _ 로 바꿔버리기 때문에 강제로 변경 기능 추가
-            for (int i = 0; i < PhotoshopToUnity.ReplaceCharList.Count; i++)
-            {
-                filename = System.Text.RegularExpressions.Regex.Replace(filename, "([" + PhotoshopToUnity.ReplaceCharList[i] + "])", "");
-            }
+            // 특수문자 제거
+            filename = System.Text.RegularExpressions.Regex.Replace(filename, PhotoshopToUnity.INVALID_LAYER_NAME_CHARS, "");
 
             string folder = "";
 
