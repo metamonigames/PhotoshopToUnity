@@ -91,88 +91,13 @@ function renameLayers(ref)
 			var suffix = "";
             var layerName = inLayer.name.toLowerCase();
 
-            if((inLayer.kind == LayerKind.TEXT && layerName.indexOf("txt_") == -1)
-                || layerName.indexOf("stxt_") != -1)
-            {
-                prefix = "stxt_";
-
-                // stxt 처리
-				if(layerName.indexOf('^') != -1)
-				{
-					return;
-				}
-
-				// 레이어 이름의 공백을 _ 로 변경
-                inLayer.name = inLayer.name.replace(/\s/gi, "_");
-
-				// 한글을 영문으로 변경
-				inLayer.name = convertKorToEng(inLayer.name);
-
-				var text = inLayer.textItem;
-				var stroke = getStroke(text);
-				var strokeSize = "null";
-				var strokeColor = "null";
-				var dropShadow = getDropShadow(text);
-				var dropShadowLocalLightingAngle = "null";
-				var dropShadowOpacity = "null";
-				var dropShadowDistance = "null";
-				var dropShadowColor = "null";
-
-				if(stroke)
-				{
-					strokeSize = stroke.size;
-					strokeColor = stroke.color;
-				}
-				if(dropShadow)
-				{
-					dropShadowLocalLightingAngle = dropShadow.localLightingAngle;
-					dropShadowDistance = dropShadow.distance;
-					dropShadowOpacity = dropShadow.opacity;
-					dropShadowColor = dropShadow.color;
-				}
-
-				var textExtents = getTextExtents(text);
-
-				// 텍스트 - 이름,폰트명,폰트 사이즈,폰트 내용,색
-				suffix += '^';
-				suffix += text.font + '^';
-				suffix += Math.round(text.size * textExtents.x_scale) + '^';
-				suffix += text.contents.replace(/(\r\n|\n|\r)/gm, "<br>") + '^';
-				suffix += '#' + text.color.rgb.hexValue;
-
-				// 이펙트 - stroke
-				suffix += '^';
-				suffix += strokeSize + '^';
-				if(strokeColor != "null")
-				{
-					suffix += '#' + strokeColor;
-				}
-				else
-				{
-					suffix += strokeColor;
-				}
-
-				// 이펙트 - dropShadow
-				suffix += '^';
-				suffix += dropShadowLocalLightingAngle + '^';
-				suffix += dropShadowDistance + '^';
-				suffix += dropShadowOpacity + '^';
-				if(dropShadowColor != "null")
-				{
-					suffix += '#' + dropShadowColor;
-				}
-				else
-				{
-					suffix += dropShadowColor;
-				}
-
-                inLayer.name = prefix + inLayer.name + suffix;
-            }
-			else if(inLayer.kind == LayerKind.TEXT)
+			// 모든 TEXT 레이어를 txt_로 통합 처리 (stxt_ 제거)
+			if(inLayer.kind == LayerKind.TEXT)
 			{
 				prefix = "txt_";
 
-				if(layerName.indexOf(prefix) != -1)
+				// 이미 txt_ 또는 stxt_로 시작하면 스킵
+				if(layerName.indexOf("txt_") != -1 || layerName.indexOf("stxt_") != -1)
 				{
 					return;
 				}
@@ -472,6 +397,7 @@ function showSettingsDialog () {
             + "• bg_ -> BG,타이틀 이미지\n"
             + "• inner_ -> 팝업 이너\n"
             + "• item_ -> 아이템 이미지\n"
+            + "• txt_ -> TextMeshPro 텍스트 (RBTextMeshProUGUI)\n"
             , {multiline: true});
 	        helpText.preferredSize.width = 325;
 

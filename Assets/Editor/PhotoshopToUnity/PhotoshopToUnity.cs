@@ -24,6 +24,7 @@ public class PhotoshopToUnity : EditorWindow
     /// bg_ -> BG,타이틀 이미지
     /// inner_ -> 팝업 이너
     /// item_ -> 아이템 이미지
+    /// txt_, stxt_ -> TextMeshPro 텍스트 (통합)
     /// </summary>
     public enum LayerType
     {
@@ -36,7 +37,6 @@ public class PhotoshopToUnity : EditorWindow
         ItemImage,
         InnerImage,
         Txt,
-        STxt,
     }
 
     /// <summary>
@@ -52,7 +52,6 @@ public class PhotoshopToUnity : EditorWindow
         "BG_",
         "ITEM_",
         "INNER_",
-        "STXT_",
         "TXT_",
     };
 
@@ -458,134 +457,12 @@ public class PhotoshopToUnity : EditorWindow
 
         UnityEngine.UI.Image targetImage;
         UnityEngine.UI.Button targetButton;
-        RBText targetText;
         RBTextMeshProUGUI targetTextMeshProUGUI;
 
         LayerType layerType = GetLayerType(layerName, datas.Count);
         switch (layerType)
         {
             case LayerType.Txt:
-                targetText = child.AddComponent<RBText>();
-
-                if (datas.Count > 4)
-                {
-                    string fontName = datas.Dequeue();
-                    int fontSize = Mathf.RoundToInt(float.Parse(datas.Dequeue()));
-                    string fontText = datas.Dequeue();
-                    string fontColor = datas.Dequeue();
-
-                    string newLineStr = "<br>";
-                    int newLineCount = fontText.Split(new[] { newLineStr }, StringSplitOptions.None).Length;
-
-                    targetText.fontSize = fontSize;
-                    targetText.resizeTextForBestFit = true;
-                    targetText.resizeTextMinSize = 1;
-                    targetText.resizeTextMaxSize = fontSize;
-                    targetText.text = fontText.Replace(newLineStr, "\n");
-                    targetText.alignment = TextAnchor.MiddleCenter;
-                    ColorUtility.TryParseHtmlString(fontColor, out Color newCol);
-                    targetText.color = newCol;
-
-                    string targetFontName = "NotoSansCJK-Bold";
-                    if (fontName.ToUpper().IndexOf("RIFFIC") != -1)
-                    {
-                        targetFontName = "RIFFICFREE-BOLD";
-                    }
-
-                    string[] files = UnityEditor.AssetDatabase.FindAssets($"t:font", new string[] { "Assets/Resources/Fonts/Editor" });
-                    foreach (string guid in files)
-                    {
-                        string guidToPath = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
-                        Font asset = UnityEditor.AssetDatabase.LoadAssetAtPath<Font>(guidToPath);
-                        if (asset != null)
-                        {
-                            if (targetFontName == asset.name)
-                            {
-                                targetText.font = asset;
-                            }
-                        }
-                    }
-
-                    RectTransform tText = targetText.GetComponent<RectTransform>();
-                    tText.sizeDelta = new Vector2(targetText.GetComponent<RectTransform>().sizeDelta.x * 1.1f, (fontSize * 1.5f) * newLineCount);
-
-                    // Stroke 옵션이 있을 시 처리
-                    {
-                        // 여긴 int.Parse 나 파싱을 하면 안됨 string 으로 받아야 함 (null 일 경우가 있어서)
-                        string isStroke = datas.Dequeue();
-                        string fontStrokeColor = datas.Dequeue();
-                        if (isStroke != null && isStroke != "")
-                        {
-                            // strokeSize, strokeColor
-                            float fontStrokeSize = Mathf.RoundToInt(float.Parse(isStroke));
-                            // 포토샵에서 사용된 값을 그대로 넣었더니 너무 이상해서 2로 들어오면 1.2f 로 수정.
-                            fontStrokeSize = 1.0f + (fontStrokeSize * 0.1f);
-                            Color strokeColor;
-                            ColorUtility.TryParseHtmlString(fontStrokeColor, out strokeColor);
-
-                            // 유니티에 적용
-                            UnityEngine.UI.Outline targetStroke = child.AddComponent<UnityEngine.UI.Outline>();
-                            targetStroke.effectColor = strokeColor;
-                            targetStroke.effectDistance = new Vector2(fontStrokeSize, fontStrokeSize * -1);
-                        }
-                    }
-
-                    // DropShadow 옵션이 있을 시 처리
-                    {
-                        // 여긴 int.Parse 나 파싱을 하면 안됨 string 으로 받아야 함 (null 일 경우가 있어서)
-                        string isDropShadow = datas.Dequeue();
-                        string fontDropShadowDistance = datas.Dequeue();
-                        string fontDropShadowOpacity = datas.Dequeue();
-                        string fontDropShadowColor = datas.Dequeue();
-                        if (isDropShadow != null && isDropShadow != "")
-                        {
-                            // dropShadowLocalLightingAngle, dropShadowDistance, dropShadowOpacity, dropShadowColor
-                            int fontDropShadowLocalLightingAngle = Mathf.RoundToInt(float.Parse(isDropShadow));
-                            Color dropShadowColor;
-                            ColorUtility.TryParseHtmlString(fontDropShadowColor, out dropShadowColor);
-                            dropShadowColor.a = (int.Parse(fontDropShadowOpacity) / 100f);
-
-                            // 유니티에 적용 (아래는 예제)
-                            UnityEngine.UI.Shadow targetShadow = child.AddComponent<UnityEngine.UI.Shadow>();
-                            targetShadow.effectColor = dropShadowColor;
-
-
-                            //targetShadow.effectDistance = new Vector2(int.Parse(fontDropShadowDistance), int.Parse(fontDropShadowDistance) * -1);
-                            ///디즈니팝에서는 x값은 무조건 0으로 세팅
-                            targetShadow.effectDistance = new Vector2(0, int.Parse(fontDropShadowDistance) * -1);
-                        }
-                    }
-
-                    // 상위 폴더를 알아야 Delete 할 수 있어서 추가
-                    string addParentFolder = null;
-                    if (folders != null && folders.Length > 1)
-                    {
-                        addParentFolder = folders[folders.Length - 2];
-                    }
-
-                    string path = null;
-                    if (addParentFolder != null)
-                    {
-                        // 띄어쓰기 언더바로 치환
-                        addParentFolder = PsdImporter.SanitizeString(addParentFolder, Path.GetInvalidFileNameChars());
-
-                        path = string.Format("{0}/{1}/{2}.png", importSettings.TargetDirectory, addParentFolder, layerName);
-                    }
-                    else
-                    {
-                        path = string.Format("{0}/{1}.png", importSettings.TargetDirectory, layerName);
-                    }
-
-                    if (path != null && File.Exists(path))
-                    {
-                        File.Delete(path);
-                        File.Delete(path + ".meta");
-                    }
-                }
-                break;
-
-
-            case LayerType.STxt:
                 targetTextMeshProUGUI = child.AddComponent<RBTextMeshProUGUI>();
 
                 if (datas.Count > 4)
@@ -841,6 +718,7 @@ public class PhotoshopToUnity : EditorWindow
     /// bg_ -> BG,타이틀 이미지
     /// inner_ -> 팝업 이너
     /// item_ -> 아이템 이미지
+    /// txt_, stxt_ -> TextMeshPro 텍스트 (통합)
     /// </summary>
     /// <param name="layerName"></param>
     /// <param name="inQueueCount">1 인 경우 txt 가 아님 적어도 4 이상</param>
@@ -849,11 +727,7 @@ public class PhotoshopToUnity : EditorWindow
     {
         string name = layerName.ToUpper();
 
-        if (name.Contains(PrefixList[(int)LayerType.STxt]) && inQueueCount > 4)
-        {
-            return LayerType.STxt;
-        }
-        else if (name.Contains(PrefixList[(int)LayerType.Txt]) && inQueueCount > 4)
+        if ((name.Contains(PrefixList[(int)LayerType.Txt]) || name.Contains("STXT_")) && inQueueCount > 4)
         {
             return LayerType.Txt;
         }
