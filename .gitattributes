@@ -1,13 +1,6 @@
 # 1. 모든 파일의 줄 바꿈을 LF로 자동 관리
 * text=auto eol=lf
 
-# 2. 대용량 바이너리 파일 (이미 작성하신 LFS 설정 유지)
-*.bundle filter=lfs diff=lfs merge=lfs -text
-*.dll filter=lfs diff=lfs merge=lfs -text
-*.png filter=lfs diff=lfs merge=lfs -text
-*.jpg filter=lfs diff=lfs merge=lfs -text
-*.psd filter=lfs diff=lfs merge=lfs -text
-
 # 3. 쉘 스크립트 명시적 고정
 *.bat text eol=crlf working-tree-encoding=utf-8
 *.sh text eol=lf working-tree-encoding=utf-8
