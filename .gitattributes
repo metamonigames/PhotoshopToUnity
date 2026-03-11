@@ -1,15 +1,4 @@
-# 1. 기본 설정 (텍스트 파일 대상)
-* text=auto eol=lf
-
-# 2. 바이너리 파일 명시 (Git이 줄 바꿈 처리를 하지 않도록 함)
-*.xlsx binary
-*.xls binary
-*.png binary
-*.jpg binary
-*.gif binary
-
-# 3. 쉘 스크립트 명시적 고정 
-*.bat text eol=crlf working-tree-encoding=utf-8 
-*.ps1 text eol=crlf working-tree-encoding=utf-8 
-*.sh text eol=lf working-tree-encoding=utf-8 
+*.bat text eol=crlf working-tree-encoding=utf-8
+*.ps1 text eol=crlf working-tree-encoding=utf-8
+*.sh text eol=lf working-tree-encoding=utf-8
 *.lua text eol=lf working-tree-encoding=utf-8
